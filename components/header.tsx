@@ -32,24 +32,34 @@ export function Header() {
             Automated Trading System
           </Link>
 
-          {/* Desktop Navigation - hidden on mobile */}
-          <nav className="hidden items-center gap-6 md:flex">
-            <Link
-              href="/history"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              거래내역
-            </Link>
-            <Link
-              href="/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              설정
-            </Link>
-          </nav>
+
+
+
 
           {/* Right side controls */}
           <div className="flex items-center gap-3">
+            <nav className="hidden items-center gap-6 md:flex">
+              {/* Desktop Navigation - hidden on mobile */}
+              <Link
+                  href="/trade-schedule"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                거래예정
+              </Link>
+              <Link
+                  href="/history"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                일자별 거래내역
+              </Link>
+              <Link
+                  href="/settings"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                설정
+              </Link>
+            </nav>
+
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
@@ -110,12 +120,20 @@ export function Header() {
                 <span className="font-medium">로그인</span>
               </Link>
               <Link
+                  href="/trade-schedule"
+                  onClick={toggleMenu}
+                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-foreground hover:bg-accent transition-colors"
+              >
+                <History className="h-5 w-5" />
+                <span className="font-medium">거래예정</span>
+              </Link>
+              <Link
                 href="/history"
                 onClick={toggleMenu}
                 className="flex items-center gap-3 rounded-lg px-4 py-3 text-foreground hover:bg-accent transition-colors"
               >
                 <History className="h-5 w-5" />
-                <span className="font-medium">거래내역</span>
+                <span className="font-medium">일자별 거래내역</span>
               </Link>
               <Link
                 href="/settings"

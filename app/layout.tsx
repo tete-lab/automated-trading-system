@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased`} suppressHydrationWarning>
         <div className="flex min-h-screen flex-col">
           <Header />
           <main className="flex-1">{children}</main>
