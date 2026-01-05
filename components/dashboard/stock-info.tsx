@@ -1,8 +1,8 @@
-
 "use client"
 
 import {Card} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
+import {Badge} from "@/components/ui/badge";
 import {Stock} from "@/components/dashboard/stock";
 import {StockClear} from "@/components/dashboard/stock-clear";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
@@ -12,9 +12,11 @@ interface StockInfoProps {
     selectedStock?: Stock | null;
     onClearSelection?: () => void;
     onStockUpdate?: (updatedStock: Stock) => void; // 주식 정보 업데이트 콜백
+    autoBuyEnabled?: boolean; // 자동 매수 상태
+    autoSellEnabled?: boolean; // 자동 매도 상태
 }
 
-export function StockInfo({ selectedStock, onClearSelection, onStockUpdate }: StockInfoProps) {
+export function StockInfo({ selectedStock, onClearSelection, onStockUpdate, autoBuyEnabled = false, autoSellEnabled = false }: StockInfoProps) {
     const [localStock, setLocalStock] = useState<Stock | null>(null);
 
     // selectedStock이 변경될 때 localStock 업데이트
@@ -70,7 +72,7 @@ export function StockInfo({ selectedStock, onClearSelection, onStockUpdate }: St
 
     return (
         <TooltipProvider>
-            <Card className="p-6 rounded-2xl">
+            <Card className="p-6 rounded-2xl relative">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -116,7 +118,6 @@ export function StockInfo({ selectedStock, onClearSelection, onStockUpdate }: St
                                 선택 해제 ✕
                             </StockClear>
                         )}
-
                     </div>
 
                     {localStock && (
@@ -145,6 +146,42 @@ export function StockInfo({ selectedStock, onClearSelection, onStockUpdate }: St
                         )}
                     </p>
                 </div>
+
+                {/* 자동 거래 상태 배지 - absolute 포지셔닝 */}
+                {localStock && (autoBuyEnabled || autoSellEnabled) && (
+                    <div className="absolute top-16 right-4 flex flex-col items-end gap-2">
+                        {autoBuyEnabled && (
+                            <Badge variant="default" className="bg-blue-500 text-white text-xs flex items-center gap-1 px-3 py-1">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                <span>자동 매수 사용중</span>
+                            </Badge>
+                        )}
+                        {autoSellEnabled && (
+                            <Badge variant="default" className="bg-red-500 text-white text-xs flex items-center gap-1 px-3 py-1">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                <span>자동 매도 사용중</span>
+                            </Badge>
+                        )}
+                    </div>
+                )}
+
+                {/* CSS 애니메이션 추가 */}
+                <style jsx>{`
+                    @keyframes pulse-glow {
+                        0%, 100% {
+                            opacity: 0.6;
+                            transform: scale(0.8);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.2);
+                        }
+                    }
+                    
+                    .animate-pulse-glow {
+                        animation: pulse-glow 1.5s ease-in-out infinite;
+                    }
+                `}</style>
             </Card>
         </TooltipProvider>
     )

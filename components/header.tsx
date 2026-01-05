@@ -58,6 +58,12 @@ export function Header() {
               >
                 설정
               </Link>
+              <Link
+                  href="/super-settings"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                마스터설정
+              </Link>
             </nav>
 
             {/* Theme toggle */}
@@ -142,6 +148,14 @@ export function Header() {
               >
                 <Settings className="h-5 w-5" />
                 <span className="font-medium">설정</span>
+              </Link>
+              <Link
+                  href="/super-settings"
+                  onClick={toggleMenu}
+                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-foreground hover:bg-accent transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="font-medium">마스터설정</span>
               </Link>
             </nav>
           </div>

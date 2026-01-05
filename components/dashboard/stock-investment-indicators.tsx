@@ -138,6 +138,9 @@ export function StockInvestmentIndicators({ selectedStock }: InvestmentIndicator
                 )}
             </Card>
             <Card className="p-6 rounded-2xl">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">배당 지표</h3>
+                </div>
                 {!selectedStock ? (
                     <div className="text-center text-gray-500 py-8">
                         종목을 선택하면 배당 지표가 표시됩니다.
