@@ -218,7 +218,7 @@ export function StockGraph({ selectedStock }: StockDailyProps){
       <Card className="p-6 rounded-2xl relative shadow-sm border-slate-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="font-semibold text-xl tracking-tight ">일자별 시세 차트</h3>
+            <h3 className="font-semibold tracking-tight ">일자별 시세 차트</h3>
             <p className="text-xs text-muted-foreground mt-1">{selectedStock ? `${stockName} 가 선택 되었습니다.` : '종목을 선택하세요'}</p>
           </div>
 

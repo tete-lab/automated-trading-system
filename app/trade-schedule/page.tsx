@@ -105,6 +105,10 @@ export default function TradeHistory() {
     <div className="min-h-screen bg-[#f2f4f6]">
 
       <div className="p-4 lg:p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">거래 예정 내역</h1>
+          <p className="text-muted-foreground mt-1">거래 예정 내역 페이지</p>
+        </div>
         <Card className="p-6 rounded-2xl">
           {/* Date Filter */}
           <div className="flex items-center gap-2 mb-6">

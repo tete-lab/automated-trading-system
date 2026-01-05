@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -51,9 +50,32 @@ interface StockSearchProps {
     onStockSelect?: (stock: Stock) => void;
     onClearSelection?: () => void;
     selectedStock?: Stock | null; // 부모 컴포넌트의 selectedStock을 받아옴
+    autoBuyEnabled?: boolean; // 자동 매수 상태
+    autoSellEnabled?: boolean; // 자동 매도 상태
 }
 
-export function StockSearch({ onStockSelect, onClearSelection, selectedStock }: StockSearchProps) {
+// 자동 거래 상태 타입 정의
+interface AutoTradeStatus {
+    autoBuy: boolean;
+    autoSell: boolean;
+}
+
+// 자동 거래 상태를 확인하는 함수 (실제로는 API나 상태 관리를 통해 결정)
+const getAutoTradeStatus = (stockId: string): AutoTradeStatus => {
+    // 더미 데이터: 일부 종목만 자동 거래 활성화
+    const autoTradeStocks: Record<string, AutoTradeStatus> = {
+        "1": { autoBuy: true, autoSell: false },   // 삼성전자
+        "3": { autoBuy: false, autoSell: true },  // NAVER
+        "6": { autoBuy: true, autoSell: true },   // 에코프로
+        "12": { autoBuy: true, autoSell: false }, // 현대차
+        "19": { autoBuy: true, autoSell: false }, // 삼성전자 (favorite)
+        "21": { autoBuy: false, autoSell: true }, // 현대차 (favorite)
+    };
+    
+    return autoTradeStocks[stockId] || { autoBuy: false, autoSell: false };
+};
+
+export function StockSearch({ onStockSelect, onClearSelection, selectedStock, autoBuyEnabled = false, autoSellEnabled = false }: StockSearchProps) {
     const [selectedCategory, setSelectedCategory] = useState<CategoryType>("popular");
     const [stockList, setStockList] = useState<Stock[]>(dummyStockData.popular);
     const [filteredStockList, setFilteredStockList] = useState<Stock[]>(dummyStockData.popular);
@@ -193,56 +215,76 @@ export function StockSearch({ onStockSelect, onClearSelection, selectedStock }: 
                             검색 결과가 없습니다.
                         </div>
                     ) : (
-                        filteredStockList.map((stock) => (
-                            <div
-                                key={stock.id}
-                                onClick={() => handleStockClick(stock)}
-                                className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 relative ${
-                                    stock.favorite_yn === "y" ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700" : "bg-card"
-                                } ${
-                                    selectedStockId === stock.id
-                                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-2 ring-blue-200 dark:ring-blue-700"
-                                        : "hover:bg-accent hover:shadow-sm"
-                                }`}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <div className={`font-medium ${selectedStockId === stock.id ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-foreground'}`}>
-                                            {stock.name}
-                                            {stock.favorite_yn === "y" && (
-                                                <span className="ml-2 text-yellow-500">⭐</span>
-                                            )}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">{stock.code}</div>
-                                    </div>
-                                    <div className="text-right relative">
-                                        {/* 선택된 종목일 때만 우측 가격 영역에 동그란 X 버튼 표시 */}
-                                        {selectedStockId === stock.id && (
-                                            <div className="absolute -top-1 -right-1 z-10">
-                                                <StockClear
-                                                    onClear={(e) => handleClearStockItem(e, stock.id)}
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-5 w-5 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-sm min-w-0"
-                                                >
-                                                    <span className="text-xs">✕</span>
-                                                </StockClear>
+                        filteredStockList.map((stock) => {
+                            const autoTradeStatus = getAutoTradeStatus(stock.id);
+                            return (
+                                <div
+                                    key={stock.id}
+                                    onClick={() => handleStockClick(stock)}
+                                    className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 relative ${
+                                        stock.favorite_yn === "y" ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700" : "bg-card"
+                                    } ${
+                                        selectedStockId === stock.id
+                                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-2 ring-blue-200 dark:ring-blue-700"
+                                            : "hover:bg-accent hover:shadow-sm"
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <div className={`font-medium flex items-center ${selectedStockId === stock.id ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-foreground'}`}>
+                                                {stock.name}
+                                                {stock.favorite_yn === "y" && (
+                                                    <span className="ml-2 text-yellow-500">⭐</span>
+                                                )}
+                                                {/* 자동 거래 상태 아이콘 */}
+                                                {(autoTradeStatus.autoBuy || autoTradeStatus.autoSell) && (
+                                                    <div className="flex items-center ml-2 gap-1">
+                                                        {autoTradeStatus.autoBuy && (
+                                                            <div 
+                                                                className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                                                                title="자동 매수 사용중"
+                                                            ></div>
+                                                        )}
+                                                        {autoTradeStatus.autoSell && (
+                                                            <div 
+                                                                className="w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                                                                title="자동 매도 사용중"
+                                                            ></div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-
-                                        <div className={`font-medium ${selectedStockId === stock.id ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-foreground'}`}>
-                                            {stock.price.toLocaleString()}원
+                                            <div className="text-sm text-muted-foreground">{stock.code}</div>
                                         </div>
-                                        <div className={`text-sm ${stock.change > 0 ? 'text-red-500' : stock.change < 0 ? 'text-blue-500' : 'text-muted-foreground'}`}>
-                                            {stock.change > 0 ? '+' : ''}{stock.change.toLocaleString()} ({stock.changePercent > 0 ? '+' : ''}{stock.changePercent}%)
+                                        <div className="text-right relative">
+                                            {/* 선택된 종목일 때만 우측 가격 영역에 동그란 X 버튼 표시 */}
+                                            {selectedStockId === stock.id && (
+                                                <div className="absolute -top-1 -right-1 z-10">
+                                                    <StockClear
+                                                        onClear={(e) => handleClearStockItem(e, stock.id)}
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-5 w-5 p-0 rounded-full bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-sm min-w-0"
+                                                    >
+                                                        <span className="text-xs">✕</span>
+                                                    </StockClear>
+                                                </div>
+                                            )}
+
+                                            <div className={`font-medium ${selectedStockId === stock.id ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-foreground'}`}>
+                                                {stock.price.toLocaleString()}원
+                                            </div>
+                                            <div className={`text-sm ${stock.change > 0 ? 'text-red-500' : stock.change < 0 ? 'text-blue-500' : 'text-muted-foreground'}`}>
+                                                {stock.change > 0 ? '+' : ''}{stock.change.toLocaleString()} ({stock.changePercent > 0 ? '+' : ''}{stock.changePercent}%)
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                        거래량: {stock.volume.toLocaleString()} | 시가총액: {stock.marketCap.toLocaleString()}억
+                                    </div>
                                 </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                    거래량: {stock.volume.toLocaleString()} | 시가총액: {stock.marketCap.toLocaleString()}억
-                                </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>

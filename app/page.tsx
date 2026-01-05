@@ -1,4 +1,3 @@
-
 "use client"
 
 import {StockInfo} from "@/components/dashboard/stock-info";
@@ -24,6 +23,16 @@ export default function TradingDashboard() {
     console.log("Stock selection cleared");
   };
 
+  // 주식 정보 업데이트 핸들러
+  const handleStockUpdate = (updatedStock: Stock) => {
+    // 부모 컴포넌트의 selectedStock 상태 업데이트
+    setSelectedStock(updatedStock);
+    console.log("Stock updated in dashboard:", updatedStock);
+    
+    // 필요한 경우 추가 로직 수행
+    // 예: API 호출, 다른 컴포넌트에 알림 등
+  };
+
   return (
       <div className="min-h-screen bg-[#f2f4f6]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 lg:p-6">
@@ -42,6 +51,9 @@ export default function TradingDashboard() {
             <StockInfo
                 selectedStock={selectedStock}
                 onClearSelection={handleClearSelection}
+                onStockUpdate={handleStockUpdate}
+                autoBuyEnabled={true}
+                autoSellEnabled={true}
             />
 
             {/* Investment Indicators */}
