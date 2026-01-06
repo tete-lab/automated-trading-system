@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Plus, Trash2, Edit2 } from "lucide-react"
+import { CalendarIcon, Plus, Trash2, Edit2, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { format } from "date-fns"
 import { ko } from "date-fns/locale"
@@ -62,6 +62,20 @@ export default function Settings() {
     return format(date, "yyyy-MM-dd");
   };
 
+  // 폼 초기화
+  const handleResetForm = () => {
+    setNewAccountNumber("");
+    setNewAccountName("");
+    setNewEndDate(new Date());
+  };
+
+  // 계좌 선택 (왼쪽 폼에 데이터 채우기)
+  const handleAccountClick = (account: Account) => {
+    setNewAccountNumber(account.accountNumber);
+    setNewAccountName(account.accountName);
+    setNewEndDate(account.endDate);
+  };
+
   // 계좌 추가
   const handleAddAccount = () => {
     if (!newAccountNumber.trim() || !newAccountName.trim()) {
@@ -79,22 +93,23 @@ export default function Settings() {
     };
 
     setAccounts(prev => [...prev, newAccount]);
-
-    // 입력 필드 초기화
-    setNewAccountNumber("");
-    setNewAccountName("");
-    setNewEndDate(new Date());
+    handleResetForm();
   };
 
   // 계좌 삭제
-  const handleDeleteAccount = (accountId: string) => {
+  const handleDeleteAccount = (accountId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
     if (confirm("정말로 이 계좌를 삭제하시겠습니까?")) {
       setAccounts(prev => prev.filter(account => account.id !== accountId));
+      if (newAccountNumber === accounts.find(a => a.id === accountId)?.accountNumber) {
+        handleResetForm();
+      }
     }
   };
 
   // 계좌 활성화/비활성화 토글
-  const handleToggleAccount = (accountId: string) => {
+  const handleToggleAccount = (accountId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
     setAccounts(prev =>
         prev.map(account =>
             account.id === accountId
@@ -105,7 +120,8 @@ export default function Settings() {
   };
 
   // 계좌 수정
-  const handleEditAccount = (accountId: string) => {
+  const handleEditAccount = (accountId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
     setEditingAccount(accountId);
   };
 
@@ -224,10 +240,7 @@ export default function Settings() {
                     />
                   </div>
 
-                  {/* 새 계좌 등록 영역 */}
                   <div className="border-t pt-6 space-y-4">
-                    <Label className="text-lg font-semibold">새 계좌 등록</Label>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">계좌번호</Label>
@@ -272,14 +285,6 @@ export default function Settings() {
                         </PopoverContent>
                       </Popover>
                     </div>
-
-                    <Button
-                        onClick={handleAddAccount}
-                        className="w-full rounded-lg bg-green-600 hover:bg-green-700 text-white py-3 text-base"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      계좌 추가
-                    </Button>
                   </div>
 
                   <Button
@@ -297,10 +302,24 @@ export default function Settings() {
               <Card className="p-6 rounded-2xl">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-lg font-semibold">등록된 계좌</Label>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-lg font-semibold">등록된 계좌</Label>
+
+
+                      <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleResetForm}
+                          className="h-6 w-6 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                          title="계좌 입력 초기화"
+                      >
+                        <Plus className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+
+                    </div>
                     <span className="text-sm text-muted-foreground">
-                    총 {accounts.length}개
-                  </span>
+                      총 {accounts.length}개
+                    </span>
                   </div>
 
                   {accounts.length === 0 ? (
@@ -310,19 +329,25 @@ export default function Settings() {
                   ) : (
                       <div className="space-y-3">
                         {accounts.map((account) => (
-                            <Card key={account.id} className={`p-4 border-2 transition-all ${
-                                account.isActive
-                                    ? 'border-green-200 bg-green-50 dark:bg-green-900/20'
-                                    : 'border-gray-200 bg-gray-50 dark:bg-gray-900/20'
-                            }`}>
+                            <Card 
+                                key={account.id} 
+                                onClick={() => handleAccountClick(account)}
+                                className={`p-4 border-2 transition-all cursor-pointer hover:shadow-md ${
+                                    account.isActive
+                                        ? 'border-green-200 bg-green-50 dark:bg-green-900/20'
+                                        : 'border-gray-200 bg-gray-50 dark:bg-gray-900/20'
+                                }`}
+                            >
                               <div className="space-y-3">
                                 {editingAccount === account.id ? (
                                     // 편집 모드
-                                    <EditAccountForm
-                                        account={account}
-                                        onSave={(updatedData) => handleSaveEdit(account.id, updatedData)}
-                                        onCancel={() => setEditingAccount(null)}
-                                    />
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                      <EditAccountForm
+                                          account={account}
+                                          onSave={(updatedData) => handleSaveEdit(account.id, updatedData)}
+                                          onCancel={() => setEditingAccount(null)}
+                                      />
+                                    </div>
                                 ) : (
                                     // 보기 모드
                                     <>
@@ -350,7 +375,7 @@ export default function Settings() {
                                           <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleEditAccount(account.id)}
+                                              onClick={(e) => handleEditAccount(account.id, e)}
                                               className="p-1 h-7 w-7"
                                           >
                                             <Edit2 className="w-3 h-3" />
@@ -358,7 +383,7 @@ export default function Settings() {
                                           <Button
                                               variant="ghost"
                                               size="sm"
-                                              onClick={() => handleDeleteAccount(account.id)}
+                                              onClick={(e) => handleDeleteAccount(account.id, e)}
                                               className="p-1 h-7 w-7 text-red-500 hover:text-red-700"
                                           >
                                             <Trash2 className="w-3 h-3" />
@@ -373,7 +398,7 @@ export default function Settings() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleToggleAccount(account.id)}
+                                            onClick={(e) => handleToggleAccount(account.id, e)}
                                             className={`text-xs h-7 ${
                                                 account.isActive
                                                     ? 'border-red-200 text-red-600 hover:bg-red-50'
