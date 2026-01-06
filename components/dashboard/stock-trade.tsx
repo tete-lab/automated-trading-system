@@ -498,6 +498,14 @@ export function StockTrade({ selectedStock }: StockTradeProps) {
                         </Button>
                     </TabsContent>
                 </Tabs>
+                <div className="p-4 bg-white rounded-xl text-xs text-muted-foreground shadow-sm">
+                    <p className="font-semibold mb-2">📌 도움말</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                        <li>리스트의 항목을 선택하면 상단 패널에서 상세 설정을 변경할 수 있습니다.</li>
+                        <li>자동 매매 조건이 'True'인 종목만 상단에 표시됩니다.</li>
+                        <li>조건 미달인 종목은 회색으로 표시되며 매매 대상에서 제외됩니다.</li>
+                    </ul>
+                </div>
             </Card>
         </>
     )
