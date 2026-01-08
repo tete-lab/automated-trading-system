@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 # 1. pnpm 설치
 RUN npm install -g pnpm
