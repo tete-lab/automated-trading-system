@@ -1,0 +1,7 @@
+services:
+  frontend:
+    build: .
+    container_name: automated-trading-system
+    ports:
+      - "3002:3002"
+    restart: always
